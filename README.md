@@ -29,3 +29,4 @@ JetsonDMS (Jetson Driver Monitoring System) is an embedded vision system built w
 
 - Fedora Linux 43 X86_64 PC
 - Ubuntu 22.04.5 LTS, Jetson
+- Local compile on Jetson
