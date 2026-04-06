@@ -25,6 +25,19 @@ bool VisionPipeline::init(int camera_id, const std::string& model_path) {
         std::cerr << "[VisionPipeline] Failed to initialize camera" << std::endl;
         return false;
     }
+
+    // Capture and save one frame as camera output artifact.
+    raw_frame_ = camera_->captureFrame();
+    if (raw_frame_.empty()) {
+        std::cerr << "[VisionPipeline] Failed to capture initial frame" << std::endl;
+        return false;
+    }
+
+    if (!cv::imwrite("output.jpg", raw_frame_)) {
+        std::cerr << "[VisionPipeline] Failed to save frame to output.jpg" << std::endl;
+        return false;
+    }
+    std::cout << "[VisionPipeline] Saved captured frame to output.jpg" << std::endl;
     
     // Initialize preprocessor (typical model input size: 224x224 or 640x640)
     if (!preprocessor_->init(224, 224)) {
