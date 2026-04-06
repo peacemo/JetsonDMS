@@ -54,7 +54,8 @@ bool VisionPipeline::detect(DetectResult& result) {
     }
     
     // Step 1: Capture frame
-    if (!camera_->captureFrame(raw_frame_)) {
+    raw_frame_ = camera_->captureFrame();
+    if (raw_frame_.empty()) {
         std::cerr << "[VisionPipeline] Failed to capture frame" << std::endl;
         result.status = DETECT_STATUS_ERROR;
         return false;

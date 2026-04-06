@@ -30,10 +30,9 @@ public:
 
     /**
      * Capture a single frame from camera
-     * @param frame Output frame data
-     * @return true on success, false on failure
+     * @return Captured frame on success, empty cv::Mat on failure
      */
-    bool captureFrame(cv::Mat& frame);
+    cv::Mat captureFrame();
 
     /**
      * Release camera resources
@@ -41,9 +40,15 @@ public:
     void release();
 
 private:
+    std::string buildCsiPipeline(int camera_id, int width, int height, int fps) const;
+    bool openCsiCamera(int camera_id, int width, int height, int fps);
+
     cv::VideoCapture cap_;
     int camera_id_;
     bool is_initialized_;
+    int width_;
+    int height_;
+    int fps_;
 };
 
 } // namespace vision
