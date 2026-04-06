@@ -36,6 +36,9 @@ OPENCV_LIBS = $(shell pkg-config --libs opencv4)
 CFLAGS += $(OPENCV_CFLAGS)
 CXXFLAGS += $(OPENCV_CFLAGS)
 
+# Auto dependency generation for headers
+DEPFLAGS = -MMD -MP
+
 # TensorRT flags (uncomment when implementing)
 # TRT_LIBS = -lnvinfer -lcudart
 
@@ -57,11 +60,11 @@ $(TARGET): $(OBJS)
 
 # Compile C sources
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 # Compile C++ sources
 $(BUILD_DIR)/vision/%.o: $(VISION_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 
 # Clean
 clean:
@@ -69,5 +72,8 @@ clean:
 
 # Rebuild
 rebuild: clean all
+
+# Include generated dependency files when present
+-include $(OBJS:.o=.d)
 
 .PHONY: all dirs clean rebuild
