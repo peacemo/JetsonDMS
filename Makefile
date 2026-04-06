@@ -25,8 +25,8 @@ CXX_OBJS = $(patsubst $(VISION_DIR)/%.cpp,$(BUILD_DIR)/vision/%.o,$(CXX_SRCS))
 OBJS = $(C_OBJS) $(CXX_OBJS)
 
 # Flags
-CFLAGS = -I$(SRC_DIR) -Wall
-CXXFLAGS = -I$(SRC_DIR) -std=c++14 -Wall
+CFLAGS = -I$(SRC_DIR) -Wall -g -O0
+CXXFLAGS = -I$(SRC_DIR) -std=c++14 -Wall -g -O0
 
 # OpenCV flags
 OPENCV_CFLAGS = $(shell pkg-config --cflags opencv4)

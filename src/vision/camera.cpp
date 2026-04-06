@@ -1,6 +1,8 @@
 #include "include/internal/camera.hpp"
+#include <chrono>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 namespace vision {
 
@@ -8,6 +10,9 @@ namespace {
 constexpr int kDefaultWidth = 1280;
 constexpr int kDefaultHeight = 720;
 constexpr int kDefaultFps = 30;
+constexpr int kCaptureRetries = 5;
+constexpr int kCaptureRetryDelayMs = 30;
+constexpr int kCsiWarmupFrames = 3;
 } // namespace
 
 Camera::Camera() 
@@ -72,12 +77,22 @@ cv::Mat Camera::captureFrame() {
         return frame;
     }
 
-    if (!cap_.read(frame) || frame.empty()) {
-        std::cerr << "[Camera] Failed to capture frame" << std::endl;
-        return cv::Mat();
+    for (int attempt = 1; attempt <= kCaptureRetries; ++attempt) {
+        if (cap_.read(frame) && !frame.empty()) {
+            return frame;
+        }
+
+        std::cerr << "[Camera] Capture attempt " << attempt
+                  << "/" << kCaptureRetries << " failed" << std::endl;
+
+        if (attempt < kCaptureRetries) {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(kCaptureRetryDelayMs));
+        }
     }
 
-    return frame;
+    std::cerr << "[Camera] Failed to capture frame after retries" << std::endl;
+    return cv::Mat();
 }
 
 void Camera::release() {
@@ -104,7 +119,7 @@ std::string Camera::buildCsiPipeline(int camera_id, int width, int height, int f
         << " ! video/x-raw, format=BGRx"
         << " ! videoconvert"
         << " ! video/x-raw, format=BGR"
-        << " ! appsink";
+        << " ! appsink max-buffers=1 drop=true sync=false";
 
     return pipeline.str();
 }
@@ -121,6 +136,12 @@ bool Camera::openCsiCamera(int camera_id, int width, int height, int fps) {
     if (!cap_.isOpened()) {
         std::cerr << "[Camera] CSI pipeline opened then became unavailable" << std::endl;
         return false;
+    }
+
+    // Warm up CSI stream to avoid unstable first frames.
+    cv::Mat warmup_frame;
+    for (int i = 0; i < kCsiWarmupFrames; ++i) {
+        cap_.read(warmup_frame);
     }
 
     return true;
