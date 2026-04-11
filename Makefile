@@ -29,8 +29,12 @@ CFLAGS = -I$(SRC_DIR) -Wall -g -O0
 CXXFLAGS = -I$(SRC_DIR) -std=c++14 -Wall -g -O0
 
 # OpenCV flags
-OPENCV_CFLAGS = $(shell pkg-config --cflags opencv4)
-OPENCV_LIBS = $(shell pkg-config --libs opencv4)
+# Pin to the APT-managed OpenCV 4.8 installation under /usr/lib.
+OPENCV_CFLAGS = -I/usr/include/opencv4
+OPENCV_LIBS = /usr/lib/libopencv_core.so \
+			  /usr/lib/libopencv_imgproc.so \
+			  /usr/lib/libopencv_imgcodecs.so \
+			  /usr/lib/libopencv_videoio.so
 
 # Add OpenCV flags to compilation
 CFLAGS += $(OPENCV_CFLAGS)
