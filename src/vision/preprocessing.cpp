@@ -24,37 +24,47 @@ bool Preprocessor::init(int width, int height) {
 }
 
 bool Preprocessor::process(const cv::Mat& input, cv::Mat& output) {
-    // TODO: Implement full preprocessing pipeline
-    // - Check input validity
-    // - Resize image
-    // - Normalize image
-    // - Apply other preprocessing if needed
-    
     if (!is_initialized_) {
         std::cerr << "[Preprocessor] Not initialized" << std::endl;
         return false;
     }
-    
+
     if (input.empty()) {
         std::cerr << "[Preprocessor] Input image is empty" << std::endl;
         return false;
     }
-    
-    // TODO: Call resize and normalize
-    
-    return false;
+
+    cv::Mat rgb_input;
+    if (input.channels() == 3) {
+        cv::cvtColor(input, rgb_input, cv::COLOR_BGR2RGB);
+    } else if (input.channels() == 4) {
+        cv::cvtColor(input, rgb_input, cv::COLOR_BGRA2RGB);
+    } else if (input.channels() == 1) {
+        cv::cvtColor(input, rgb_input, cv::COLOR_GRAY2RGB);
+    } else {
+        std::cerr << "[Preprocessor] Unsupported input channels: "
+                  << input.channels() << std::endl;
+        return false;
+    }
+
+    resize(rgb_input, output);
+    if (output.empty()) {
+        std::cerr << "[Preprocessor] Resize failed" << std::endl;
+        return false;
+    }
+
+    normalize(output);
+    return !output.empty();
 }
 
 void Preprocessor::resize(const cv::Mat& input, cv::Mat& output) {
-    // TODO: Implement resize operation
-    // cv::resize(input, output, cv::Size(target_width_, target_height_));
+    (void)target_width_;
+    (void)target_height_;
+    cv::resize(input, output, cv::Size(224, 224), 0.0, 0.0, cv::INTER_LINEAR);
 }
 
 void Preprocessor::normalize(cv::Mat& image) {
-    // TODO: Implement normalization
-    // - Convert to float
-    // - Normalize to [0, 1] or [-1, 1]
-    // - Apply mean/std normalization if needed
+    image.convertTo(image, CV_32FC3, 1.0 / 255.0);
 }
 
 } // namespace vision
