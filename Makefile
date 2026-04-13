@@ -43,11 +43,16 @@ CXXFLAGS += $(OPENCV_CFLAGS)
 # Auto dependency generation for headers
 DEPFLAGS = -MMD -MP
 
-# TensorRT flags (uncomment when implementing)
-# TRT_LIBS = -lnvinfer -lcudart
+# TensorRT/CUDA flags for Jetson
+TRT_CFLAGS = -I/usr/include/aarch64-linux-gnu -I/usr/local/cuda/include
+TRT_LIB_DIRS = -L/usr/lib/aarch64-linux-gnu -L/usr/local/cuda/lib64
+TRT_LIBS = -lnvinfer -lcudart
+
+CXXFLAGS += $(TRT_CFLAGS)
 
 LDFLAGS = -lstdc++
-LDFLAGS += $(OPENCV_LIBS) #$(TRT_LIBS)
+LDFLAGS += $(TRT_LIB_DIRS)
+LDFLAGS += $(OPENCV_LIBS) $(TRT_LIBS)
 
 # Default target
 all: dirs $(TARGET)
